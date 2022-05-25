@@ -2,6 +2,13 @@
 
 > A Vue.js project
 
+# 概述
+* 1. 使用ElementUI编写基本的表单界面
+* 2. css美化界面
+* 3. 前端进行输入框验证
+* 4. 登录成功跳转首页
+* 5. 登录失败进行弹窗告警
+
 ## Build Setup
 
 ``` bash
