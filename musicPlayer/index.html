@@ -3,118 +3,84 @@
 
 <head>
     <meta charset="UTF-8">
-
-    <title>vue基础</title>
-    <style>
-        a {
-            text-decoration: none;
-            font-style: oblique;
-        }
-
-        div {
-            border: red solid 1px
-        }
-
-        .disappear {
-            display: none;
-        }
-
-        .video_con video {
-            position: fixed;
-            width: 800px;
-            height: 546px;
-            left: 50%;
-            top: 50%;
-            margin-top: -273px;
-            transform: translateX(-50%);
-            z-index: 990;
-        }
-
-        .video_con .mask {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            left: 0;
-            top: 0;
-            z-index: 980;
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-    </style>
+    <link rel="stylesheet" href="./css/index.css">
+    <title>音乐播放器</title>
 </head>
 
 <body>
-<!-- 导入axios包 -->
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
 
-<div id="app">
-    <!-- 歌曲搜索 -->
-    <input placeholder="输入歌曲" v-model="query" @keyup.enter="searchMusic">
-
-    <!-- 歌曲列表 -->
-    <div>
-        <h1>歌曲列表</h1>
-        <ul>
-            <li v-for="item in musicList">
-                <!-- 播放按钮 -->
-                <a @click="playMusic(item.id,item.album.id)"><button>►</button>&nbsp;</a>
-                <!-- 歌曲名称 -->
-                {{ item.name }}
-                <!-- MV按钮 -->
-                <span v-if="item.mvid!=0" @click="playMV(item.mvid)">
-                        <i>&nbsp;&nbsp; MV </i>
-                    </span>
-            </li>
-        </ul>
-    </div>
-
-    <!-- 专辑封面 -->
-    <div>
-        <h1>专辑封面</h1>
-        <!-- 如果albumCover为空,使用默认图片,否则使用albumCover -->
-        <img :src="albumCover==''?'https://s4.music.126.net/style/web2/img/default/default_album.jpg':albumCover">
-    </div>
-
-    <!-- 播放状态 -->
-    <div>
-        <h1>播放状态</h1>
-        <!-- 用v-show控制播放状态 -->
-        <h2 v-show="isPlaying">播放中...</h2>
-        <!-- 用v-bind对象控制暂停状态 -->
-        <h2 :class="{disappear:isPlaying}">已暂停...</h2>
-    </div>
-
-    <!-- 播放按钮 -->
-    <div>
-        <h1>播放按钮</h1>
-        <audio @play="play" @pause="pause" :src="musicUrl" controls autoplay loop></audio>
-    </div>
-
-    <!-- 播放MV -->
-    <div class="video_con" v-show="showMV">
-        <video ref='video' :src="mvUrl" controls="controls" preload="auto"></video>
-        <div class="mask" @click="closeMV" @pause="pause"></div>
-    </div>
-
-    <!-- 歌曲评论 -->
-    <div>
-        <h5 class='title'>热门评论</h5>
-        <div>
-            <dl v-for="item in hotComments">
-                <dt>
-                    <img :src="item.user.avatarUrl+'?param=130y130'" alt="" />
-                </dt>
-                <dd>{{ item.user.nickname }}</dd>
-                <dd>
-                    {{ item.content }}
-                </dd>
-            </dl>
+<div class="wrap">
+    <!-- 播放器主体区域 -->
+    <div class="play_wrap" id="player">
+        <!-- 歌曲搜索 -->
+        <div class="search_bar">
+            <img src="images/player_title.png" alt="" />
+            <input type="text" autocomplete="off" v-model="query" @keyup.enter="searchMusic" placeholder="输入要搜素的歌曲">
         </div>
-    </div>
 
+        <!-- 歌曲列表 -->
+        <div class="center_con">
+            <div class='song_wrapper' ref='song_wrapper'>
+                <ul class="song_list">
+                    <li v-for="item in musicList">
+                        <!-- 播放按钮 -->
+                        <a href="javascript:;" @click="playMusic(item.id,item.album.id)"></a>
+                        <!-- 歌曲名称 -->
+                        <b>{{ item.name }}</b>
+                        <!-- MV按钮 -->
+                        <span>
+                            <i  v-if="item.mvid!=0" @click="playMV(item.mvid)"></i>
+                        </span>
+                    </li>
+                </ul>
+                <img src="images/line.png" class="switch_btn" alt="">
+            </div>
+
+            <!-- 歌曲详情 -->
+            <div class="player_con" :class="{playing:isPlaying}">
+                <img src="images/player_bar.png" class="play_bar" />
+                <!-- 黑胶碟片 -->
+                <img src="images/disc.png" class="disc autoRotate" />
+                <img :src="albumCover==''?'./images/cover.png':albumCover" class="cover autoRotate" />
+                <img class="cover autoRotate" />
+            </div>
+
+            <!-- 歌曲评论 -->
+            <div class="comment_wrapper" ref='comment_wrapper'>
+                <h5 class='title'>热门留言</h5>
+                <div class='comment_list'>
+                    <dl v-for="item in hotComments">
+                        <dt>
+                            <img :src="item.user.avatarUrl" alt="">
+                        </dt>
+                        <dd class="name">{{ item.user.nickname }}</dd>
+                        <dd class="detail">
+                            {{ item.content }}
+                        </dd>
+                    </dl>
+                </div>
+                <img src="images/line.png" class="right_line">
+            </div>
+        </div>
+
+        <!-- 播放按钮 -->
+        <div class="audio_con">
+            <audio ref='audio' @play="play" @pause="pause" :src="musicUrl" controls autoplay loop class="myaudio"></audio>
+        </div>
+
+        <!-- 播放MV -->
+        <div class="video_con" v-show="showMV">
+            <video id="myVideo" ref='video' :src="mvUrl" controls="controls" autoplay="autoplay"></video>
+            <div class="mask" @click="closeMV"></div>
+        </div>
+
+    </div>
 </div>
 
-<script src="./js/main.js"></script>
+    <!-- 导入axios包 -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+    <script src="./js/main.js"></script>
 </body>
 
 </html>

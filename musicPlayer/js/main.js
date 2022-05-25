@@ -41,7 +41,7 @@
 */
 
 var app = new Vue({
-    el: "#app",
+    el: "#player",
     data: {
         // 搜索关键字
         query: "",
@@ -58,7 +58,9 @@ var app = new Vue({
         // MV地址
         mvUrl: "",
         // 是否显示MV
-        showMV: false
+        showMV: false,
+        // 跟去封面
+        coverUrl: ""
     },
     methods: {
         // 歌曲搜索
@@ -123,6 +125,8 @@ var app = new Vue({
         },
         // 关闭MV
         closeMV() {
+            var myVideo = document.getElementById("myVideo");
+            myVideo.pause()
             this.showMV = false
         }
     }

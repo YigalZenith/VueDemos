@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>天气预报</title>
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+    <div class="wrap" id="app">
+        <div class="search_form">
+            <div class="logo"><img src="img/logo.png" alt="logo" /></div>
+            <div class="form_group">
+                <input type="text" class="input_txt" placeholder="请输入查询的天气" v-model="city" @keyup.enter="searchWeather" />
+                <!-- 1.用v-model把输入框内容和city变量进行绑定
+                2.文本框和按钮分别使用回车和点击事件调用查询数据函数
+                3.查询的数据通过ul/li标签,结合v-for进行展示 -->
+                <button class="input_sub" @click="searchWeather">
+                    搜 索
+                </button>
+            </div>
+            <div class="hotkey">
+                <!-- 1.通过城市和地区码的映射字典获取所有的城市名
+                2.点击事件调用changeCity方法,并把点击的城市名称传递给此方法 -->
+                <a href="javascript:;" v-for="(v,k) in cityCode" @click="changeCity(k)">{{ k }}</a>
+            </div>
+        </div>
+
+        <ul class="weather_list">
+            <li v-for="(item,index) in results" :key="item.date" :style="{transitionDelay:index*100+'ms'}">
+                <div class="info_type">
+                    <span class="iconfont">{{ item.type }}</span>
+                </div>
+                <div class="info_temp">
+                    <b>{{ item.low}}</b>
+                    ~
+                    <b>{{ item.high}}</b>
+
+                </div>
+                <div class="info_date">
+                    <span>{{ item.date }}</span>
+                </div>
+            </li>
+        </ul>
+
+
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            data: {
+                // 需要和数据框双向绑定的变量
+                city:"北京",
+                hotCitys: ["北京", "上海", "广州", "深圳"],
+                // 因为city已经和输入框双向绑定,会跟随输入一直变化展示效果不太友好,所以重新定义一个变量
+                searchCity: "",
+                // 因为API需要接收的是地区码,所以需要用一个字典把地区和地区码进行映射,把用户输入的地区名转换为地区码
+                // 简洁API: http://wthrcdn.etouch.cn/weather_mini?citykey=101010200
+                // 完整API: http://wthrcdn.etouch.cn/WeatherApi?citykey=101010100
+                // 查询地区代码: https://blog.csdn.net/iechenyb/article/details/78652461
+                cityCode: {
+                    "北京":101010100,
+                    "上海":101020100,
+                    "广州":101280101,
+                    "深圳":101280601,
+                    "保定":101090201
+                },
+                // 接收查询结果的变量
+                results: []
+            },
+            methods: {
+                searchWeather(){
+                    // console.log(city)
+                    var that = this
+                    axios.get("http://wthrcdn.etouch.cn/weather_mini?citykey="+this.cityCode[this.city]).then(
+                        function (response) {
+                        that.results = response.data.data.forecast
+                        that.searchCity = response.data.data.city
+                        },
+                        function (error) {
+                            console.log(error)
+                        }
+                    )
+                },
+                changeCity(newCity){
+                    this.city = newCity
+                    this.searchWeather()   // 调用自定义方法需要用  this.方法名()
+                }
+            }
+        })
+    </script>
+</body>
+</html>
